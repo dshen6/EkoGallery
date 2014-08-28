@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eko.ekoapp.com.ekogallery;
+package eko.ekoapp.com.ekogallery.shims;
 
 import android.graphics.drawable.Drawable;
 import android.net.Uri;

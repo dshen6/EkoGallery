@@ -2,7 +2,6 @@ package eko.ekoapp.com.ekogallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,14 +15,22 @@ import android.widget.ImageView;
 public class PhotoViewAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
-    private LoaderCompatShim<Cursor> mDrawableFactory;
+    private ImageFetcher fetcher;
+//    public boolean shouldRequestThumb = false;
+    private int width;
+
 
     public PhotoViewAdapter(Context context) {
         super(context, null, false);
         mInflater = LayoutInflater.from(context);
     }
-    public void setDrawableFactory(LoaderCompatShim<Cursor> factory) {
-        mDrawableFactory = factory;
+
+    public void setImageFetcher(ImageFetcher fetcher) {
+        this.fetcher = fetcher;
+    }
+
+    public void setColWidth(int width) {
+        this.width = width;
     }
 
     @Override
@@ -34,11 +41,9 @@ public class PhotoViewAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        ImageView iv = (ImageView) view.findViewById(R.id.thumbnail);
-        Drawable recycle = iv.getDrawable();
-        Drawable drawable = mDrawableFactory.drawableForItem(cursor, recycle);
-        if (recycle != drawable) {
-            iv.setImageDrawable(drawable);
-        }
+        ImageView imageView = (ImageView) view.findViewById(R.id.thumbnail);
+        final int id = cursor.getInt(MainActivity.INDEX_ID);
+        fetcher.fetch(id, imageView, width);
     }
+
 }

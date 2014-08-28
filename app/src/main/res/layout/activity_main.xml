@@ -28,8 +28,9 @@
         <GridView android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:choiceMode="multipleChoiceModal"
+            android:choiceMode="multipleChoice"
             android:numColumns="auto_fit"
+            android:listSelector="@drawable/item_selector"
             android:stretchMode="columnWidth"
             android:drawSelectorOnTop="true" />
         <TextView android:id="@android:id/empty"

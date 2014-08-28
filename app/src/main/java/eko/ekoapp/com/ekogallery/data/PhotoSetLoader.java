@@ -28,7 +28,7 @@ import android.provider.MediaStore.Files.FileColumns;
 
 import java.util.ArrayList;
 
-import eko.ekoapp.com.ekogallery.LoaderCompatShim;
+import eko.ekoapp.com.ekogallery.shims.LoaderCompatShim;
 import eko.ekoapp.com.ekogallery.drawables.DataUriThumbnailDrawable;
 
 public class PhotoSetLoader extends CursorLoader implements LoaderCompatShim<Cursor> {
