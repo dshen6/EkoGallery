@@ -3,12 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/activatedBackgroundIndicator"
-    android:padding="2dip">
+    android:padding="1dp">
 
     <eko.ekoapp.com.ekogallery.Views.SquareImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/thumbnail" />
+    
+    <ImageView
+        android:visibility="gone"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_checkmark_selected_user"
+        android:id="@+id/checkmark"
+        android:layout_gravity="bottom|right"/>
 
 </FrameLayout>

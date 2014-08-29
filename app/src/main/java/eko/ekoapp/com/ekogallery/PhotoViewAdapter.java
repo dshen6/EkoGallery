@@ -19,6 +19,15 @@ public class PhotoViewAdapter extends CursorAdapter {
 //    public boolean shouldRequestThumb = false;
     private int width;
 
+    private IsCheckedProvider isCheckedProvider;
+
+    public interface IsCheckedProvider {
+        public boolean isCheckedId(int id);
+    }
+
+    public void setCheckedProvider(IsCheckedProvider isCheckedProvider) {
+        this.isCheckedProvider = isCheckedProvider;
+    }
 
     public PhotoViewAdapter(Context context) {
         super(context, null, false);
@@ -42,7 +51,11 @@ public class PhotoViewAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ImageView imageView = (ImageView) view.findViewById(R.id.thumbnail);
-        final int id = cursor.getInt(MainActivity.INDEX_ID);
+        ImageView checkmark = (ImageView) view.findViewById(R.id.checkmark);
+        int id = cursor.getInt(MainActivity.INDEX_ID);
+        if (isCheckedProvider != null) {
+            checkmark.setVisibility(isCheckedProvider.isCheckedId(id) ? View.VISIBLE : View.GONE);
+        }
         fetcher.fetch(id, imageView, width);
     }
 

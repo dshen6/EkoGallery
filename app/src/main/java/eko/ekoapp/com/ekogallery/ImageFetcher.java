@@ -223,9 +223,9 @@ public class ImageFetcher {
                 BitmapFetcherTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
                 if (this == bitmapDownloaderTask) {
                     imageView.setImageBitmap(bitmap);
-                    Animation anim = AnimationUtils.loadAnimation(imageView.getContext(), android.R.anim.fade_in);
-                    imageView.setAnimation(anim);
-                    anim.start();
+//                    Animation anim = AnimationUtils.loadAnimation(imageView.getContext(), android.R.anim.fade_in);
+//                    imageView.setAnimation(anim);
+//                    anim.start();
                 }
             } else {
                 setInvisible();

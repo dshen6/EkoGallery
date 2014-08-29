@@ -6,7 +6,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +14,9 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -24,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class MainActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor>, PhotoViewAdapter.IsCheckedProvider {
 
     private static final String TAG = "HOME";
     private static final int LOADER_GALLERY = 1;
@@ -39,7 +41,8 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
     private int maxImages;
     private AdapterView.OnItemClickListener onItemClickListener = new GridClickListener();
     private Set<String> fileNames = new HashSet<String>();
-    private SparseBooleanArray checkStatus = new SparseBooleanArray();
+    private SparseBooleanArray checkStatusPos = new SparseBooleanArray();
+    private SparseBooleanArray checkStatusId = new SparseBooleanArray();
     private final ImageFetcher fetcher = new ImageFetcher();
 
     @Override
@@ -47,10 +50,11 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageSelectedCount = maxImages = getIntent().getIntExtra(INTENT_EXTRA_MAX_IMAGE_COUNT, 1); // default to one
+        maxImages = getIntent().getIntExtra(INTENT_EXTRA_MAX_IMAGE_COUNT, 1); // default to one
 
         adapter = new PhotoViewAdapter(this);
         adapter.setImageFetcher(fetcher);
+        adapter.setCheckedProvider(this);
         GridView gridView = (GridView) findViewById(android.R.id.list);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(onItemClickListener);
@@ -116,15 +120,20 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
 
     }
 
-    private void setChecked(int position, boolean b) {
-        checkStatus.put(position, b);
+    private void setChecked(int position, int id, boolean b) {
+        checkStatusPos.put(position, b);
+        checkStatusId.put(id, b);
     }
 
-    public boolean isChecked(int position) {
-        return checkStatus.get(position);
+    public boolean isCheckedId(int id) {
+        return checkStatusId.get(id);
     }
 
-    public void selectClicked(View ignored) {
+    public boolean isCheckedPos(int position) {
+        return checkStatusPos.get(position);
+    }
+
+    public void finishActivity() {
         Intent data = new Intent();
         if (fileNames.isEmpty()) {
             this.setResult(RESULT_CANCELED);
@@ -154,35 +163,68 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         return name;
     }
 
+    private int getImageId(int position) {
+        cursor.moveToPosition(position);
+        return cursor.getInt(MainActivity.INDEX_ID);
+    }
+
     private class GridClickListener implements AdapterView.OnItemClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
             String name = getImageName(position);
+            int id = getImageId(position);
 
             if (name == null) {
                 return;
             }
 
-            if (imageSelectedCount == maxImages) {
+            boolean isChecked = !isCheckedPos(position);
+
+            if (imageSelectedCount == maxImages && isChecked) {
                 return;
             }
-
-            boolean isChecked = !isChecked(position);
 
             if (isChecked) {
                 if (fileNames.add(name)) {
                     imageSelectedCount++;
-                    view.setSelected(true);
                 }
             } else {
                 if (fileNames.remove(name)) {
                     imageSelectedCount--;
-                    view.setSelected(false);
                 }
             }
 
-            setChecked(position, isChecked);
+            setChecked(position, id, isChecked);
+            if (imageSelectedCount == 1 && maxImages == 1) {
+                finishActivity();
+                return;
+            }
+            adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (maxImages == 1) {
+            return false;
+        }
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.photo_picker, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.done:
+                finishActivity();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
