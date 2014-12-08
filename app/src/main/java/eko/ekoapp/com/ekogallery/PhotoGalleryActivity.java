@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class MainActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor>, PhotoViewAdapter.IsCheckedProvider {
+public class PhotoGalleryActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor>, PhotoViewAdapter.IsCheckedProvider {
 
     private static final String TAG = "HOME";
     private static final int LOADER_GALLERY = 1;
@@ -48,7 +48,7 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_photo_gallery);
 
         maxImages = getIntent().getIntExtra(INTENT_EXTRA_MAX_IMAGE_COUNT, 1); // default to one
 
@@ -156,7 +156,7 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
         String name = null;
 
         try {
-            name = cursor.getString(MainActivity.INDEX_DATA);
+            name = cursor.getString(PhotoGalleryActivity.INDEX_DATA);
         } catch (Exception e) {
             return null;
         }
@@ -165,7 +165,7 @@ public class MainActivity extends Activity implements LoaderManager.LoaderCallba
 
     private int getImageId(int position) {
         cursor.moveToPosition(position);
-        return cursor.getInt(MainActivity.INDEX_ID);
+        return cursor.getInt(PhotoGalleryActivity.INDEX_ID);
     }
 
     private class GridClickListener implements AdapterView.OnItemClickListener {

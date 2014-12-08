@@ -2,7 +2,6 @@ package eko.ekoapp.com.ekogallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,7 @@ public class PhotoViewAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(R.layout.photo_set_item, parent, false);
+        View view = mInflater.inflate(R.layout.photo_gallery_item, parent, false);
         return view;
     }
 
@@ -52,11 +51,12 @@ public class PhotoViewAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ImageView imageView = (ImageView) view.findViewById(R.id.thumbnail);
         ImageView checkmark = (ImageView) view.findViewById(R.id.checkmark);
-        int id = cursor.getInt(MainActivity.INDEX_ID);
+        int id = cursor.getInt(PhotoGalleryActivity.INDEX_ID);
+        String data = cursor.getString(PhotoGalleryActivity.INDEX_DATA);
         if (isCheckedProvider != null) {
             checkmark.setVisibility(isCheckedProvider.isCheckedId(id) ? View.VISIBLE : View.GONE);
         }
-        fetcher.fetch(id, imageView, width);
+        fetcher.fetch(id, data, imageView, width);
     }
 
 }

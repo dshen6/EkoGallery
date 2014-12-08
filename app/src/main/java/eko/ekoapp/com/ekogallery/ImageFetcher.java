@@ -18,9 +18,11 @@ package eko.ekoapp.com.ekogallery;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -30,6 +32,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -53,18 +56,21 @@ import java.util.concurrent.RejectedExecutionException;
  */
 public class ImageFetcher {
 
+    private static final String TAG = "IMAGE_FETCHER";
     private int colWidth;
     private long origId;
+    String data;
     private ExecutorService executor;
 
     public ImageFetcher() {
         executor = Executors.newCachedThreadPool();
     }
 
-    public void fetch(Integer id, ImageView imageView, int colWidth) {
+    public void fetch(Integer id, String data, ImageView imageView, int colWidth) {
         resetPurgeTimer();
         this.colWidth = colWidth;
         this.origId = id;
+        this.data = data;
         Bitmap bitmap = getBitmapFromCache(id);
 
         if (bitmap == null) {
@@ -179,13 +185,18 @@ public class ImageFetcher {
             if (isCancelled()) {
                 return null;
             }
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+
             Bitmap thumb = MediaStore.Images.Thumbnails.getThumbnail(mContext.getContentResolver(), position, 12345,
-                    MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                    MediaStore.Images.Thumbnails.MICRO_KIND, options);
             if (isCancelled()) {
                 return null;
             }
             if (thumb == null) {
-                return null;
+                byte[] preferred = getPreferredImageBytes(data);
+
+                return BitmapFactory.decodeByteArray(preferred, 0, preferred.length, options);
             } else {
                 if (isCancelled()) {
                     return null;
@@ -194,6 +205,18 @@ public class ImageFetcher {
                 }
             }
 
+        }
+
+        protected byte[] getPreferredImageBytes(String data) {
+            Log.d(TAG, "using exif");
+            byte[] thumbnail = null;
+            try {
+                ExifInterface exif = new ExifInterface(data);
+                if (exif.hasThumbnail()) {
+                    thumbnail = exif.getThumbnail();
+                }
+            } catch (IOException e) { }
+            return thumbnail;
         }
 
         private void setInvisible() {
@@ -217,6 +240,7 @@ public class ImageFetcher {
             if (isCancelled()) {
                 bitmap = null;
             }
+            Log.d("TAG", "bitmap is + " + bitmap);
             addBitmapToCache(position, bitmap);
             if (imageViewReference != null) {
                 ImageView imageView = imageViewReference.get();
